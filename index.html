@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bynari Insight</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Debut — the app's own welcome screen (not the marketing site). A clean
+     entry; "Open the tool" reveals the working app. -->
+<div id="debut">
+  <div class="debut-topbar">
+    <span class="debut-brand">Bynari Insight<span class="debut-dot">.</span></span>
+    <button class="debut-about-btn" id="debutAboutBtn">What we do</button>
+  </div>
+  <div class="launcher">
+    <div class="launcher-inner">
+      <p class="launcher-greeting">Welcome to <span class="debut-accent">Bynari Insight</span></p>
+      <p class="launcher-subtitle">Your Listing and Inventory Management Application</p>
+
+
+      <section class="launch-actions">
+        <h2 class="launch-heading">What would you like to do?</h2>
+        <div class="launch-grid">
+          <button class="launch-card" data-launch="list">
+            <span class="launch-card-title">List an item</span>
+            <span class="launch-card-sub">Turn your photos into a finished, complete listing.</span>
+          </button>
+          <button class="launch-card" data-launch="analyze">
+            <span class="launch-card-title">Analyze a listing</span>
+            <span class="launch-card-sub">See what's weak, missing, or holding it back.</span>
+          </button>
+          <button class="launch-card" data-launch="edit">
+            <span class="launch-card-title">Edit a listing</span>
+            <span class="launch-card-sub">Refresh one that isn't selling.</span>
+          </button>
+          <button class="launch-card" data-launch="inventory">
+            <span class="launch-card-title">View your inventory</span>
+            <span class="launch-card-sub">See and manage everything you've got.</span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div class="about-overlay hidden" id="aboutOverlay">
+    <div class="about-card">
+      <button class="about-close" id="aboutClose" aria-label="Close">&times;</button>
+      <h2 class="about-title">What Bynari Insight does</h2>
+      <p>Bynari Insight helps you build complete, accurate eBay and ecommerce listings and keep your inventory in order — all on your own machine. Nothing is published for you, and nothing leaves your computer.</p>
+      <p>Start a new item from your photos, refresh a listing that isn't selling, or review what you already have. Bynari fills in the details buyers look for, so every listing is as complete as it can be.</p>
+    </div>
+  </div>
+</div>
+
+<!-- "How this works" — the welcome orientation, reachable any time from the
+     Listings sidebar once the first-run welcome has given way to the queue. -->
+<div class="about-overlay hidden" id="howOverlay">
+  <div class="about-card">
+    <button class="about-close" id="howClose" aria-label="Close">&times;</button>
+    <h2 class="about-title">How this works</h2>
+    <p>Walk one item through a few short steps. Bynari fills in the details buyers look for, and you finish with a complete listing you can take to eBay. Nothing gets published for you — it stays on your machine.</p>
+    <p class="how-journey">Describe or photograph it › see what similar items show › get a finished listing to save.</p>
+    <p>No selling experience needed.</p>
+  </div>
+</div>
+
+<!-- Classic menu bar -->
+<nav class="menu-bar" aria-label="Main menu">
+  <div class="menu-item">File</div>
+  <div class="menu-item">Edit</div>
+  <div class="menu-item">View</div>
+  <div class="menu-item">Tools</div>
+  <div class="menu-item">Help</div>
+</nav>
+
+<!-- Top tab bar — paid-desktop only; hidden on free tier -->
+<div class="tab-bar" id="tabBar" role="tablist">
+  <button class="nav-arrow nav-arrow-bar" id="navBack" aria-label="Back" title="Back" disabled>‹</button>
+  <button class="nav-arrow nav-arrow-bar" id="navForward" aria-label="Forward" title="Forward" disabled>›</button>
+  <button class="tab-bar-btn tab-home" id="tabHomeBtn" title="Back to the start screen">⌂ Home</button>
+  <button class="tab-bar-btn active" data-tab="listing">Listings</button>
+  <button class="tab-bar-btn" data-tab="analyze">Analyzer</button>
+  <button class="tab-bar-btn" data-tab="inventory">My Inventory</button>
+  <div class="tab-bar-spacer"></div>
+  <button class="tab-bar-refresh" id="navRefresh" title="Reload this page">↻ Refresh</button>
+</div>
+
+<!-- Tab content wrapper — only one tab-content is visible at a time -->
+<div class="tab-wrap">
+
+<!-- Listings tab — the walkthrough sidebar + main content (the spine) -->
+<div class="tab-content" data-tab="listing">
+<div class="app-body">
+
+  <aside class="sidebar" aria-label="Walkthrough navigation">
+    <a class="nav-item" data-route="home" href="#home">
+      <span class="nav-icon">☰</span><span class="nav-label">My listings</span>
+    </a>
+    <div class="nav-group-label">Listing</div>
+    <a class="nav-item walk-step" data-route="photos" href="#photos">
+      <span class="nav-step">1</span><span class="nav-label">Your item</span>
+    </a>
+    <a class="nav-item walk-step" data-route="identify" href="#identify">
+      <span class="nav-step">2</span><span class="nav-label">Identify</span>
+    </a>
+    <a class="nav-item walk-step" data-route="comps" href="#comps">
+      <span class="nav-step">3</span><span class="nav-label">Items like yours</span>
+    </a>
+    <a class="nav-item walk-step" data-route="category" href="#category">
+      <span class="nav-step">4</span><span class="nav-label">Category</span>
+    </a>
+    <a class="nav-item walk-step" data-route="title" href="#title">
+      <span class="nav-step">5</span><span class="nav-label">Title &amp; Description</span>
+    </a>
+    <a class="nav-item walk-step" data-route="datasheet" href="#datasheet">
+      <span class="nav-step">6</span><span class="nav-label">Datasheet</span>
+    </a>
+    <a class="nav-item walk-step" data-route="measureup" href="#measureup">
+      <span class="nav-step">7</span><span class="nav-label">Analyzer</span>
+    </a>
+    <div class="nav-group-label">Sell on eBay</div>
+    <!-- No data-route: the router (app.js) skips these, so they navigate to their own
+         in-app pages. Relative .html links aren't caught by the external-link interceptor. -->
+    <a class="nav-item" href="cockpit.html">
+      <span class="nav-icon">🛒</span><span class="nav-label">Sell — list to eBay</span>
+    </a>
+    <a class="nav-item" href="onboarding.html">
+      <span class="nav-icon">🔌</span><span class="nav-label">Connect eBay account</span>
+    </a>
+    <div class="sidebar-spacer"></div>
+    <a class="nav-howlink" id="howThisWorksLink" href="#">How this works</a>
+    <a class="nav-howlink nav-startover hidden" id="startOverLink" href="#">Start over</a>
+  </aside>
+
+  <main class="content">
+
+    <!-- Persistent walkthrough navigation (hidden on Home / Settings) -->
+
+    <!-- Home screen -->
+    <section class="screen" data-screen="home">
+      <!-- Empty state: shown when no items in flight -->
+      <div class="home-empty" id="homeEmpty">
+        <h1 class="home-empty-title">This is where you start</h1>
+        <p class="home-empty-subtitle">Whether you want to earn a little extra, clear out things you no longer need, or grow a real business — your listing starts right here.</p>
+        <p class="home-empty-how">Walk one item through a few short steps. Bynari fills in the details buyers look for, and you finish with a complete listing you can take to eBay. Nothing gets published for you — it stays on your machine.</p>
+        <p class="home-empty-journey">Describe or photograph it › see what similar items show › get a finished listing to save.</p>
+        <div class="home-cta-row">
+          <button class="button primary home-cta" id="homeNewItemBtn">
+            <span class="home-cta-plus">＋</span><span>New item</span>
+          </button>
+          <button class="button secondary home-cta" id="homeRewriteBtn">
+            <span>Rewrite a listing</span>
+          </button>
+          <button class="button secondary home-cta" data-route="batch">
+            <span>Start a batch</span>
+          </button>
+        </div>
+        <p class="home-empty-reassure">No selling experience needed.</p>
+        <p class="home-batch-link"><a href="#batchguide" data-route="batchguide">Listing a lot at once? See how to batch &rarr;</a></p>
+      </div>
+      <!-- Queue state: shown when at least one item in flight -->
+      <div class="home-queue hidden" id="homeQueue">
+        <div class="home-queue-header">
+          <h1 class="screen-title">In progress</h1>
+          <div class="home-cta-row">
+            <button class="button primary" id="homeNewItemBtnQueue">
+              <span class="home-cta-plus">＋</span><span>New item</span>
+            </button>
+            <button class="button secondary" id="homeRewriteBtnQueue">
+              <span>Rewrite a listing</span>
+            </button>
+            <button class="button secondary" data-route="batch">
+              <span>Start a batch</span>
+            </button>
+          </div>
+        </div>
+        <div class="queue-list" id="queueList"></div>
+      </div>
+    </section>
+
+    <!-- Rewrite-a-listing entry screen -->
+    <section class="screen hidden" data-screen="rewrite">
+      <h1 class="screen-title">Rewrite a listing</h1>
+      <p class="screen-subtitle">Refresh an existing listing that's not selling. Bynari Insight pulls the listing's data and walks you through a rewrite.</p>
+
+      <div class="rewrite-box">
+        <div class="field">
+          <label for="rewriteInput">eBay listing URL or item number</label>
+          <input type="text" id="rewriteInput" autocomplete="off" placeholder="https://www.ebay.com/itm/... or the item number">
+          <span class="helper-note">Paste the URL from your active eBay listing, or just the item number.</span>
+        </div>
+        <div class="rewrite-status" id="rewriteStatus"></div>
+      </div>
+
+      <div class="action-row">
+        <button class="button secondary" data-route="home">Back</button>
+        <button class="button primary" id="rewriteSubmitBtn">Pull listing</button>
+      </div>
+      <p class="helper-note"><a href="#worklist" data-route="worklist" class="wl-entry-link">Have several? Rank a batch by what to refresh first →</a></p>
+    </section>
+
+    <!-- Rewrite worklist — rank many listings by what to refresh first -->
+    <section class="screen hidden" data-screen="worklist">
+      <h1 class="screen-title">What to refresh first</h1>
+      <p class="screen-subtitle">Bynari Insight ranks your inventory by what to refresh first. Or paste specific listing numbers below.</p>
+
+      <div class="rewrite-status" id="worklistStatus"></div>
+
+      <details class="worklist-paste">
+        <summary>Rank specific listings instead</summary>
+        <div class="field">
+          <label for="worklistInput">Listing URLs or item numbers</label>
+          <textarea id="worklistInput" rows="4" placeholder="One per line — paste URLs or item numbers"></textarea>
+        </div>
+        <button class="button secondary" id="worklistRankBtn">Rank pasted list</button>
+      </details>
+
+      <div class="action-row">
+        <button class="button secondary" data-route="rewrite">Back</button>
+        <button class="button primary" id="worklistRankInvBtn">Rank my inventory</button>
+      </div>
+
+      <div class="worklist-results" id="worklistResults"></div>
+    </section>
+
+    <!-- Rewrite result screen — the review of the pasted listing -->
+    <section class="screen hidden" data-screen="rewrite-result">
+      <h1 class="screen-title">Your listing, reviewed</h1>
+      <p class="screen-subtitle">Where your current listing stands, and how to give it a fresh start.</p>
+
+      <div class="rewrite-result" id="rewriteResultContent"></div>
+
+      <div class="action-row">
+        <button class="button secondary" data-route="rewrite">Back</button>
+        <button class="button primary" data-next="comps">Build the refresh</button>
+      </div>
+    </section>
+
+    <!-- Photos screen -->
+    <section class="screen hidden" data-screen="photos">
+      <h1 class="screen-title">Tell us about your item</h1>
+      <p class="screen-subtitle">A sentence or two is enough to begin. Got a pile? Just start with one.</p>
+
+      <div class="field">
+        <label for="identifyUserDesc">Describe it</label>
+        <span class="helper-note">Anything you know — what it is, where it came from, condition, any markings. Whatever you'd say if you were holding it up to a friend.</span>
+        <textarea id="identifyUserDesc" rows="3" placeholder="e.g. Vintage watch that was my grandfather's, runs well, says 'A. Schild' on the movement…"></textarea>
+      </div>
+
+      <div class="section-divider">and / or</div>
+
+      <div class="field">
+        <label>Add a photo</label>
+        <span class="helper-note">Just have photos? They're enough — eBay will let you remove the background and edit them later.</span>
+        <div class="photo-roles-guide hidden" id="photoRolesGuide"></div>
+        <div class="photo-grid" id="photoGrid"></div>
+        <input type="file" id="photoInput" accept="image/*" multiple hidden>
+      </div>
+
+      <div class="action-row">
+        <button class="button secondary" data-route="home">Back</button>
+        <button class="button primary" data-next="identify">Next</button>
+      </div>
+    </section>
+
+    <!-- Category screen (existing mock, kept for now — replaced when we reach it) -->
+    <section class="screen hidden" data-screen="category">
+      <h1 class="screen-title">Category</h1>
+      <p class="screen-subtitle">The category buyers find this in.</p>
+      <div class="category-card">
+        <div class="category-name">—</div>
+        <div class="category-path">—</div>
+        <a href="#" class="change-link">Change category</a>
+        <div class="category-picker hidden">
+          <p class="refine-message">Type what the item is, then pick the closest match.</p>
+          <div class="refine-row">
+            <input type="text" class="cat-picker-input" placeholder="e.g. wristwatch, pocket watch, men's ring" autocomplete="off">
+            <button class="button primary cat-picker-btn" type="button">Search</button>
+          </div>
+          <ul class="cat-picker-results"></ul>
+          <p class="cat-picker-status"></p>
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="button secondary" data-next="comps">Back</button>
+        <button class="button primary" data-next="title">Next</button>
+      </div>
+    </section>
+
+    <!-- Identify screen -->
+    <section class="screen hidden" data-screen="identify">
+      <h1 class="screen-title">What is it?</h1>
+      <p class="screen-subtitle">Type whatever your item has on it. Leave blank if it doesn't have one — many items don't.</p>
+
+      <div class="identify-fields">
+        <div class="field">
+          <label for="identifyBrand">Brand <span class="field-optional">(if it has one)</span></label>
+          <input type="text" id="identifyBrand" autocomplete="off" placeholder="e.g. Anker, J.Crew, Pendleton, Hamilton">
+          <span class="helper-note">The maker's name. Many items — clothing, vintage finds, art, food, handmade — have no clear brand.</span>
+        </div>
+        <div class="field">
+          <label for="identifyModel">Model number or something else <span class="field-optional">(if it has one)</span></label>
+          <input type="text" id="identifyModel" autocomplete="off" placeholder="e.g. A2021, Khaki Field, Corvair 500">
+          <span class="helper-note">A short code or name on the item — model number, movement caliber, line name, anything in small print near the brand.</span>
+        </div>
+        <div class="field">
+          <label for="identifyYear">Year <span class="field-optional">(if it matters)</span></label>
+          <input type="text" id="identifyYear" autocomplete="off" placeholder="e.g. 1966, 1970s, Victorian-era">
+          <span class="helper-note">Important for vintage, antique, or collectible items. Skip for modern things.</span>
+        </div>
+        <div class="field">
+          <label for="identifySize">Size <span class="field-optional">(if applicable)</span></label>
+          <input type="text" id="identifySize" autocomplete="off" placeholder="e.g. 10, M, W34 L30, 8.5 EU">
+          <span class="helper-note">For clothing, shoes, rings, or anything that comes in sizes. Skip otherwise.</span>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="button secondary" data-next="photos">Back</button>
+        <button class="button primary" id="identifyNextBtn" data-next="comps">Next</button>
+      </div>
+    </section>
+    <section class="screen hidden" data-screen="comps">
+      <h1 class="screen-title">Items like yours</h1>
+      <p class="screen-subtitle">Do you see any like yours? Check the ones that look closest.</p>
+      <button type="button" class="comps-match-btn hidden" id="compsMatchBtn">Match these for me</button>
+      <div class="comps-status" id="compsStatus"></div>
+      <div class="comps-list" id="compsList"></div>
+      <div class="comps-survey-bar hidden" id="compsSurveyBar">
+        <span class="survey-count" id="surveyCount">Tell us which ones look closest.</span>
+        <button class="button primary" id="surveyDetailsBtn" disabled>Use these</button>
+      </div>
+      <div class="comps-refine" id="compsRefine">
+        <p class="refine-message">Paste an eBay listing URL or item ID to use a specific listing — or type new search terms to try a different angle.</p>
+        <div class="refine-row">
+          <input type="text" id="compsRefineInput" placeholder="eBay listing URL, title, or extra search terms" autocomplete="off">
+          <button class="button primary" id="compsRefineBtn">Search</button>
+        </div>
+      </div>
+      <p class="comps-sold-prompt">Don't see any here? <a href="#" id="soldOnEbayLink">Try the sold listings on eBay</a></p>
+      <div class="comps-morebar">
+        <button class="button secondary" id="compsShowMoreBtn">None of these match</button>
+      </div>
+      <div class="action-row">
+        <button class="button secondary" data-next="identify">Back</button>
+        <button class="button primary" data-next="category">Next</button>
+      </div>
+
+      <div class="comps-analyze hidden" id="compsAnalyze">
+        <button class="analyze-back" id="analyzeBackBtn">← Back to results</button>
+        <div class="analyze-card">
+          <h2 class="analyze-title" id="analyzeTitle"></h2>
+          <div class="analyze-meta" id="analyzeMeta"></div>
+          <div class="analyze-desc" id="analyzeDesc"></div>
+          <div class="analyze-specifics-wrap">
+            <h3 class="analyze-specifics-heading">Item specifics</h3>
+            <table class="analyze-specifics" id="analyzeSpecs"></table>
+          </div>
+          <div class="analyze-actions">
+            <button class="button primary" id="analyzeUseBtn">Use these</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="screen hidden" data-screen="title">
+      <h1 class="screen-title">Title, Description &amp; Condition</h1>
+      <p class="screen-subtitle">If this is close but isn't your item, edit these values.</p>
+      <div class="tdc-status" id="tdcStatus"></div>
+
+      <div class="field">
+        <label for="titleInput">Title <span class="field-optional">— up to 80 characters</span></label>
+        <input type="text" id="titleInput" maxlength="80" autocomplete="off">
+        <span class="char-counter" id="titleCounter">0 / 80</span>
+      </div>
+
+      <div class="field">
+        <label for="descriptionInput">Description</label>
+        <textarea id="descriptionInput" rows="8"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="conditionChoice">Condition</label>
+        <select id="conditionChoice"></select>
+        <span class="helper-note">Pick the closest match — you can edit the statement below.</span>
+      </div>
+
+      <div class="field">
+        <label for="conditionInput">Condition statement</label>
+        <textarea id="conditionInput" rows="4"></textarea>
+      </div>
+
+      <div class="action-row">
+        <button class="button secondary" data-next="category">Back</button>
+        <button class="button primary" data-next="datasheet">Next</button>
+      </div>
+    </section>
+    <section class="screen hidden" data-screen="datasheet">
+      <h1 class="screen-title">Your Datasheet</h1>
+      <p class="screen-subtitle">The finished listing. Look it over, then run it through the Analyzer.</p>
+
+      <div class="datasheet" id="datasheetContent"></div>
+
+      <div class="action-row">
+        <button class="button secondary" data-next="title">Back</button>
+        <button class="button primary" data-next="measureup">Next</button>
+      </div>
+    </section>
+
+    <!-- Measure up — the verdict. How complete the listing is vs. what buyers
+         search for; Save lives here, at the end of the analysis. -->
+    <section class="screen hidden" data-screen="measureup">
+      <h1 class="screen-title">Analyzer</h1>
+      <p class="screen-subtitle">Before you save — here's how complete this listing is against what buyers search for.</p>
+
+      <div class="measure-up" id="measureUpContent"></div>
+
+      <div class="action-row">
+        <button class="button secondary" data-next="datasheet">Back</button>
+        <div class="action-row-right">
+          <button class="button secondary" id="measureUpSaveBtn">Save…</button>
+          <button class="button primary" id="measureUpNextBtn">Next →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Batch-listing guide — documents the high-volume workflow and tags which
+         part is Bynari's and which is eBay's. Precursor to the batch flow. -->
+    <section class="screen hidden" data-screen="batchguide">
+      <h1 class="screen-title">Listing in batches</h1>
+      <p class="screen-subtitle">How high-volume sellers move 50 items a day — and which part Bynari does for you.</p>
+
+      <div class="batch-guide">
+        <p class="batch-intro">Listing one item at a time is slow. The fast way is to work in batches: group like items, build one template, then fill each listing with only what changes. Here's the method — and where Bynari ends and eBay begins.</p>
+
+        <div class="batch-phase">
+          <div class="batch-phase-head"><span class="batch-num">1</span><h2>Get your photos in</h2><span class="batch-tag bynari">Bynari</span></div>
+          <p>Shoot with your phone, sync them to your computer (iCloud or a cable beats the eBay app), and bring the photos into your library. Your library replaces the spreadsheet sellers keep to track what's what and where it's stored.</p>
+        </div>
+
+        <div class="batch-phase">
+          <div class="batch-phase-head"><span class="batch-num">2</span><h2>Group like items</h2><span class="batch-tag bynari">Bynari</span></div>
+          <p>Put similar items together — all the women's tops, all the watch tools — so you set the category once, not fifty times.</p>
+        </div>
+
+        <div class="batch-phase">
+          <div class="batch-phase-head"><span class="batch-num">3</span><h2>Build one template for the batch</h2><span class="batch-tag bynari">Bynari</span></div>
+          <p>Make a single template for that category holding everything that's the same on every item — department, condition wording, description boilerplate, shipping — then spin off one slot per item in the batch.</p>
+        </div>
+
+        <div class="batch-phase">
+          <div class="batch-phase-head"><span class="batch-num">4</span><h2>Fill each item — only what changes</h2><span class="batch-tag bynari">Bynari</span></div>
+          <p>For each item: drop its photos in (the overall shot first, the tag second), write the title to the formula — brand, type, who it's for, size, color, the details that matter — and let Bynari fill the item specifics. All of them, not just the easy ones. Then add the price.</p>
+        </div>
+
+        <div class="batch-phase">
+          <div class="batch-phase-head"><span class="batch-num">5</span><h2>Bank them — don't publish</h2><span class="batch-tag bynari">Bynari</span></div>
+          <p>Save each as a draft and mark it done. Nothing goes live yet — you build the whole batch first, tracking what's finished as you go.</p>
+        </div>
+
+        <div class="batch-phase">
+          <div class="batch-phase-head"><span class="batch-num">6</span><h2>Send the batch to eBay</h2><span class="batch-tag ebay">In eBay</span></div>
+          <p>When the batch is ready, take it into eBay's bulk editor to schedule the listings — staggered, about a minute apart, going live the next day — and apply your promotions and store categories. Bynari hands you the finished drafts and a suggested schedule; the publishing stays in your account, in your hands.</p>
+        </div>
+
+        <p class="batch-footer">Bynari never publishes or schedules on eBay. It builds and banks the batch; you press go.</p>
+      </div>
+
+      <div class="action-row">
+        <button class="button secondary" data-route="home">Back</button>
+      </div>
+    </section>
+
+    <!-- Batch setup — pick a category template + count, spawn N draft slots. -->
+    <section class="screen hidden" data-screen="batch">
+      <h1 class="screen-title">Start a batch</h1>
+      <p class="screen-subtitle">Build one template's worth of drafts at once. Pick the template, set how many, and Bynari spawns a draft for each — ready to fill.</p>
+
+      <div class="batch-setup">
+        <div class="field">
+          <label for="batchTemplate">Template</label>
+          <select id="batchTemplate"></select>
+          <span class="helper-note" id="batchTemplateNote"></span>
+        </div>
+        <div class="field">
+          <label for="batchCount">How many items in this batch?</label>
+          <input type="number" id="batchCount" min="1" max="100" value="10">
+          <span class="helper-note">One draft is created for each, pre-filled from the template. You fill in what's different on each, then bank them.</span>
+        </div>
+        <div class="batch-setup-status" id="batchStatus"></div>
+      </div>
+
+      <div class="action-row">
+        <button class="button secondary" data-route="home">Back</button>
+        <button class="button primary" id="batchCreateBtn">Create drafts</button>
+      </div>
+    </section>
+  </main>
+</div>
+</div><!-- end Listing tab -->
+
+<!-- Analyze tab — clean up a listing that isn't selling. Paste a listing,
+     get what to fix, ranked by impact (the perfect-listing strategy). -->
+<div class="tab-content hidden" data-tab="analyze">
+  <div class="pane">
+    <h1 class="screen-title">Listing Analyzer</h1>
+    <p class="screen-subtitle">See why a listing isn't selling — and exactly what to fix, ranked by impact. Check one, or check them all.</p>
+    <p class="analyzer-audience">For sellers who already have listings live on eBay.</p>
+
+    <div class="analyzer-modes">
+      <div class="analyzer-card">
+        <h2 class="analyzer-card-title">Check a listing</h2>
+        <p class="analyzer-card-sub">Paste one listing that isn't moving.</p>
+        <div class="analyze-input-row">
+          <input type="text" id="sellItemInput" class="analyze-input" placeholder="eBay item number or listing URL" autocomplete="off">
+          <button id="sellAnalyzeBtn" class="button primary">Check a listing</button>
+        </div>
+        <div id="sellFixResult" class="sell-fix-result hidden"></div>
+      </div>
+
+      <div class="analyzer-card">
+        <h2 class="analyzer-card-title">Check your Listings</h2>
+        <p class="analyzer-card-sub">Rank your whole store by what to refresh first. Upload your <strong>Quality Listing Report</strong> — in eBay Seller Hub: Performance → <strong>Quality Listing Report</strong> — and Bynari Insight prioritizes the fixes. No login required.</p>
+        <button id="checkYourListingsBtn" class="button primary">Check your Listings</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Inventory tab — the seller's own inventory brain, backed by library.db -->
+<div class="tab-content hidden" data-tab="inventory">
+  <!-- Explainer gate — a page of text before the working surface. -->
+  <section class="inv-intro" id="invIntro">
+    <h1 class="inv-intro-title">My Inventory</h1>
+    <p class="inv-intro-lead">Everything you own, in one place — on your own drive, not ours.</p>
+    <div class="inv-intro-body">
+      <p>Bring in your active eBay listings — titles, categories, and photos — and keep them organized here, copied onto a drive you own (or your own cloud folder), yours to work with offline.</p>
+      <p>Photos come in at full size and are saved in a clean, standard format, so there's nothing to convert by hand. Turn your listings into reusable templates, and see everything you have at a glance.</p>
+      <p>Nothing is published for you, and nothing leaves your machine.</p>
+    </div>
+    <div class="inv-intro-actions">
+      <button class="button primary" id="invContinueBtn">Continue →</button>
+    </div>
+    <p class="inv-intro-alt">Not now — go to <a href="#" data-go="listing">Listings</a> or the <a href="#" data-go="analyze">Analyzer</a>.</p>
+  </section>
+
+  <div class="pane hidden" id="invPane">
+    <div class="inv-topbar">
+      <button type="button" class="inv-about-btn" id="invAboutLink">What we do</button>
+    </div>
+    <div class="inv-header">
+      <div>
+        <h1 class="screen-title">Inventory</h1>
+        <p class="screen-subtitle" id="invSubtitle">Everything you own, in one place — on your drive, not ours.</p>
+      </div>
+      <div class="inv-actions">
+        <div class="inv-import-count">
+          <span class="inv-import-label">Enter the number of listings you want to import</span>
+          <input type="number" id="invImportCount" class="inv-import-input" min="1" step="1"
+            placeholder="e.g. 25" title="Type how many to import, or pick a number below. Tap All for everything.">
+          <span class="inv-import-presets" role="group" aria-label="Quick amounts">
+            <button type="button" class="inv-preset" data-count="50">50</button>
+            <button type="button" class="inv-preset" data-count="100">100</button>
+            <button type="button" class="inv-preset" data-count="250">250</button>
+            <button type="button" class="inv-preset" data-count="0">All</button>
+          </span>
+        </div>
+        <button class="button secondary" id="invListViewBtn">List view</button>
+        <button class="button secondary" id="invUploadBtn">Upload eBay listings…</button>
+        <button class="button secondary" id="invSaveLibraryBtn"
+          title="Copy these listings' photos into your library, kept in order on your drive">Save to library</button>
+        <button class="button secondary" id="invCreateTemplatesBtn">Create templates</button>
+        <button class="button secondary" id="invExportPhotosBtn"
+          title="Download these listings' photos to a folder you choose">Export photos</button>
+        <button class="button primary" id="invNewItemBtn"><span class="home-cta-plus">＋</span><span>New item</span></button>
+        <input type="file" id="invFileInput" accept=".csv,.txt,.tsv" hidden>
+      </div>
+    </div>
+    <p class="inv-desktop-note hidden" id="invDesktopNote">Save to library and Export photos work in the desktop app.</p>
+    <div class="inv-status" id="invStatus"></div>
+    <p class="inv-nextstep hidden" id="invNextStep"></p>
+    <div class="inv-grid" id="invGrid"></div>
+  </div>
+</div>
+
+<!-- Settings tab (reachable from the menu bar) -->
+<div class="tab-content hidden" data-tab="settings">
+  <div class="tab-stub">
+    <h1 class="screen-title">Settings</h1>
+    <p class="screen-subtitle">App preferences and account. Coming next.</p>
+  </div>
+</div>
+
+</div><!-- end tab-wrap -->
+
+<!-- Global bottom Back/Next — mirrors the top arrows so every page that isn't a
+     walkthrough step (those carry their own Back/Next) ends with the same nav. -->
+<div class="bottom-nav hidden" id="bottomNav">
+  <button class="button secondary" id="bottomNavBack">Back</button>
+  <button class="button primary" id="bottomNavNext">Next</button>
+</div>
+
+<!-- Post-save thank-you modal -->
+<div class="modal-backdrop hidden" id="thankYouBackdrop">
+  <div class="modal" role="dialog" aria-labelledby="thankYouTitle">
+    <h2 id="thankYouTitle" class="modal-title">Saved.</h2>
+    <p class="modal-body" id="thankYouBody">Thanks for using Bynari Insight.</p>
+    <p class="modal-counter hidden" id="thankYouCounter"></p>
+    <p class="modal-link" id="thankYouLinkRow">
+      Visit <a href="#" id="thankYouLink" data-url="https://www.bynari-insight.com">bynari-insight.com</a> for updates and the free web version.
+    </p>
+    <p class="modal-tip" id="thankYouTipRow">
+      Enjoying Bynari Insight? <a href="#" id="thankYouTipLink" data-url="https://buymeacoffee.com/bynari">Buy me a coffee →</a>
+    </p>
+    <div class="modal-actions">
+      <button class="button secondary" id="thankYouClose">Close</button>
+      <button class="button primary" id="thankYouStartAnother">Start another listing</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

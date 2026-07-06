@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bynari — Sell</title>
+<style>
+  :root{
+    --bg:#0f1218; --card:#171b23; --line:#252b36; --ink:#e8ecf3; --muted:#9aa4b2;
+    --brand:#4f9cff; --ok:#37c07a; --err:#ff6b6b; --warn:#e6b955; --chip:#1e2430;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .gate{display:none;background:#2a1e12;border-bottom:1px solid #5a3d1a;color:#f2d9b0;
+        padding:10px 16px;font-size:13.5px}
+  .gate a{color:var(--warn);cursor:pointer;font-weight:600}
+  .app{display:flex;min-height:100vh}
+  .list{width:300px;border-right:1px solid var(--line);overflow-y:auto;flex-shrink:0}
+  .list h3{margin:0;padding:16px 16px 8px;font-size:13px;color:var(--muted);
+           text-transform:uppercase;letter-spacing:.5px}
+  .row{display:flex;gap:10px;padding:10px 14px;cursor:pointer;border-left:3px solid transparent}
+  .row:hover{background:var(--card)} .row.sel{background:var(--card);border-left-color:var(--brand)}
+  .row img,.row .ph{width:44px;height:44px;border-radius:8px;object-fit:cover;
+        background:var(--chip);flex-shrink:0}
+  .row .t{font-size:13px;line-height:1.35;max-height:36px;overflow:hidden}
+  .row .m{font-size:12px;color:var(--muted);margin-top:2px}
+  .live{color:var(--ok)} .draft-tag{color:var(--warn)}
+  .main{flex:1;padding:22px 24px 60px;overflow-y:auto}
+  .empty{color:var(--muted);margin-top:40px;text-align:center}
+  label{display:block;font-size:12px;color:var(--muted);margin:14px 0 5px}
+  input,select,textarea{width:100%;background:#0d1117;border:1px solid var(--line);
+        color:var(--ink);border-radius:9px;padding:9px 11px;font-size:14px;font-family:inherit}
+  textarea{min-height:88px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)}
+  .grid{display:flex;gap:14px;flex-wrap:wrap} .grid>div{flex:1;min-width:200px}
+  .spec{display:flex;gap:8px;align-items:center;margin:6px 0}
+  .spec .k{width:170px;color:var(--muted);font-size:13px;flex-shrink:0}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+  button{border:0;border-radius:9px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer}
+  .primary{background:var(--brand);color:#04121f}
+  .go{background:var(--ok);color:#04140b}
+  .ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .result{margin-top:20px;border:1px solid var(--line);border-radius:12px;padding:16px;
+          background:var(--card);display:none}
+  .result h4{margin:0 0 10px;font-size:14px}
+  .kv{display:flex;font-size:13.5px;margin:4px 0}
+  .kv b{width:130px;color:var(--muted);font-weight:400}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px}
+  .pill.ok{background:#0f2a1c;color:var(--ok)} .pill.err{background:#2a1414;color:var(--err)}
+  .prob{color:var(--err);font-size:13.5px;margin:4px 0}
+  .note{color:var(--muted);font-size:13px;margin-top:8px}
+  a{color:var(--brand);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="gate" id="gate">Your eBay account isn't connected yet. <a onclick="goOnboard()">Connect it →</a></div>
+<div class="app">
+  <div class="list">
+    <a href="index.html" style="display:block;padding:14px 16px 2px;color:var(--brand);
+       font-size:13px;text-decoration:none">‹ Bynari home</a>
+    <h3>Inventory</h3>
+    <div id="items"></div>
+  </div>
+  <div class="main" id="main">
+    <div class="empty" id="empty">Pick an item on the left to review and list it.</div>
+    <div id="sheet" style="display:none">
+      <label>Title <span id="tlen" class="note"></span></label>
+      <input id="f_title" maxlength="80" oninput="edit()">
+      <div class="grid">
+        <div><label>Price (USD)</label><input id="f_price" oninput="edit()"></div>
+        <div><label>Condition</label>
+          <select id="f_cond" onchange="edit()">
+            <option>New</option><option>New other</option><option>Certified refurbished</option>
+            <option>Seller refurbished</option><option>Used</option><option>Very good</option>
+            <option>Good</option><option>Acceptable</option><option>For parts or not working</option>
+          </select>
+        </div>
+      </div>
+      <label>Description</label>
+      <textarea id="f_desc" oninput="edit()"></textarea>
+      <label>Item specifics</label>
+      <div id="specs"></div>
+      <div class="note" id="photos"></div>
+
+      <div class="actions">
+        <button class="ghost" onclick="run('check')" id="b_check">Check listing</button>
+        <button class="primary" onclick="run('draft')" id="b_draft">Create draft</button>
+        <button class="go" onclick="run('publish')" id="b_pub">Publish</button>
+      </div>
+      <div class="result" id="result"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function api(){ return (window.pywebview && window.pywebview.api) || null; }
+async function call(m, ...a){
+  const x=api(); if(!x||!x[m]) throw new Error("Open this inside the Bynari app.");
+  return await x[m](...a);
+}
+const el=id=>document.getElementById(id), v=id=>el(id).value;
+function ext(u){ const x=api(); if(x&&x.open_url) x.open_url(u); else window.open(u,'_blank'); }
+function goOnboard(){ location.href='onboarding.html'; }
+
+let cur=null;   // the listing dict being edited
+
+async function init(){
+  try{
+    const st=await call('ebay_connection_status');
+    if(!(st.credentials && st.policies)) el('gate').style.display='block';
+  }catch(e){}
+  try{
+    const items=await call('items_list');
+    renderList(items||[]);
+  }catch(e){ el('items').innerHTML='<div class="note" style="padding:14px">'+e.message+'</div>'; }
+}
+
+function renderList(items){
+  const box=el('items'); box.innerHTML='';
+  if(!items.length){ box.innerHTML='<div class="note" style="padding:14px">No inventory yet.</div>'; return; }
+  items.forEach(it=>{
+    const d=document.createElement('div'); d.className='row'; d.dataset.id=it.id;
+    const thumb=it.hero?`<img src="${it.hero}">`:'<div class="ph"></div>';
+    const status=it.listing_status==='active'?'<span class="live">● live</span>'
+                 :(it.ebay_item_no?'<span class="draft-tag">● listed</span>':'');
+    d.innerHTML=`${thumb}<div><div class="t">${(it.title||it.slug||'untitled')}</div>
+      <div class="m">${it.photo_count||0} photos ${status}</div></div>`;
+    d.onclick=()=>pick(it.id, d);
+    box.appendChild(d);
+  });
+}
+
+async function pick(id, node){
+  document.querySelectorAll('.row').forEach(r=>r.classList.remove('sel'));
+  node.classList.add('sel');
+  el('result').style.display='none';
+  const L=await call('cockpit_listing', id);
+  if(!L){ return; }
+  cur=L;
+  el('empty').style.display='none'; el('sheet').style.display='block';
+  el('f_title').value=L.title||''; el('f_price').value=(L.price==null?'':L.price);
+  el('f_desc').value=L.description||'';
+  setCond(L.condition||'Used');
+  el('photos').textContent=(L.photo_count||0)+' photos — they upload to eBay when you create the draft.';
+  renderSpecs(L.specifics||{});
+  edit();
+}
+
+function setCond(c){
+  const s=el('f_cond'), t=(c||'').toLowerCase();
+  for(const o of s.options){ if(o.text.toLowerCase()===t || o.text.toLowerCase().replace(/ /g,'_')===t.replace(/ /g,'_')){ o.selected=true; return; } }
+  // enum-ish fallback
+  if(t.indexOf('part')>=0) s.value='For parts or not working'; else s.value='Used';
+}
+
+function renderSpecs(sp){
+  const box=el('specs'); box.innerHTML='';
+  const keys=Object.keys(sp);
+  if(!keys.length){ box.innerHTML='<div class="note">None on file — the datasheet fills these; eBay may require some for the category (Check will tell you).</div>'; return; }
+  keys.forEach(k=>{
+    const r=document.createElement('div'); r.className='spec';
+    r.innerHTML=`<div class="k">${k}</div>`;
+    const inp=document.createElement('input'); inp.value=sp[k];
+    inp.oninput=()=>{ cur.specifics[k]=inp.value; };
+    r.appendChild(inp); box.appendChild(r);
+  });
+}
+
+function edit(){
+  if(!cur) return;
+  cur.title=v('f_title'); cur.price=v('f_price'); cur.description=v('f_desc');
+  cur.condition=v('f_cond');
+  el('tlen').textContent='('+(v('f_title').length)+'/80)';
+}
+
+function busy(on){ ['b_check','b_draft','b_pub'].forEach(id=>el(id).disabled=on); }
+
+async function run(mode){
+  if(!cur) return;
+  if(mode==='publish' && !confirm('Publish this live to your eBay account now?')) return;
+  busy(true);
+  const R=el('result'); R.style.display='block'; R.innerHTML='<h4>Working…</h4>';
+  try{
+    const dry = mode==='check';
+    const go  = mode==='publish';
+    const res = await call('ebay_publish', cur, dry, go);
+    render(res, mode);
+  }catch(e){ R.innerHTML='<h4>Error</h4><div class="prob">'+e.message+'</div>'; }
+  busy(false);
+}
+
+function render(res, mode){
+  const R=el('result');
+  if(!res || !res.ok){
+    const probs=(res && (res.problems||[res.error])||['failed']).filter(Boolean);
+    R.innerHTML='<h4>Pre-flight <span class="pill err">needs a fix</span></h4>'+
+      (res&&res.stage?`<div class="note">stage: ${res.stage}</div>`:'')+
+      probs.map(p=>`<div class="prob">• ${p}</div>`).join('')+
+      (res&&res.resp?`<div class="note">${(typeof res.resp==='string'?res.resp:JSON.stringify(res.resp)).slice(0,300)}</div>`:'');
+    return;
+  }
+  let head, body='';
+  if(res.dry_run){
+    head='Pre-flight <span class="pill ok">passed</span>';
+    body+=kv('Category', (res.category_path||res.category_id));
+    if(res.category_changed) body+=`<div class="note">↳ category corrected from ${res.category_changed.from} to ${res.category_changed.to} (from eBay's taxonomy, not the comp).</div>`;
+    body+=kv('Condition', res.condition)+kv('Price', '$'+res.price)+
+          kv('Specifics', res.aspects+' aspects')+
+          kv('Photos', (cur.photo_count||0)+' (upload on draft)');
+  } else if(res.status==='PUBLISHED'){
+    head='<span class="pill ok">LIVE</span>';
+    body+=kv('Listing', `<a onclick="ext('${res.url}')">${res.listing_id}</a>`)+
+          kv('Category', res.category_path||res.category_id);
+  } else {
+    head='Draft created <span class="pill ok">unpublished</span>';
+    body+=kv('Offer', res.offer_id)+kv('Category', res.category_path||res.category_id)+
+          '<div class="note">Review it, then hit Publish to go live — nothing is public yet.</div>';
+  }
+  R.innerHTML='<h4>'+head+'</h4>'+body;
+}
+function kv(k,val){ return `<div class="kv"><b>${k}</b><div>${val==null?'—':val}</div></div>`; }
+
+window.addEventListener('pywebviewready', init);
+if(api()) init();
+</script>
+</body>
+</html>

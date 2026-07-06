@@ -1,0 +1,43 @@
+{
+  "kind": "bynari-photo-roles",
+  "version": 1,
+  "note": "Per-category photo roles eBay prescribes in its Sell flow (the named photo slots: Front, Dial, Measurement, …). Observed from eBay listing forms on 2026-06-14; eBay does NOT expose these through its public API, so Bynari maintains the taxonomy itself. Roles cluster by category family — match an item's category name/path to a family. Absence of a match means eBay shows no prescribed slots for that category (e.g. computer keyboards), so Bynari shows no guidance.",
+  "families": [
+    {
+      "family": "watch",
+      "label": "Wristwatch",
+      "match": {
+        "pathAny": ["Watches, Parts & Accessories", "Wristwatch"],
+        "nameAny": ["Wristwatch", "Wristwatches"]
+      },
+      "roles": [
+        { "name": "Front", "hint": "The watch face, straight on" },
+        { "name": "Back", "hint": "The caseback" },
+        { "name": "Right profile", "hint": "The crown side" },
+        { "name": "Left profile", "hint": "The side opposite the crown" },
+        { "name": "Dial", "hint": "Close-up of the dial" },
+        { "name": "Clasp closed", "hint": "Bracelet or strap clasp, fastened" },
+        { "name": "Clasp open", "hint": "Clasp unfastened" },
+        { "name": "Packaging", "hint": "Box or pouch, if it comes with one" },
+        { "name": "Certificate", "hint": "Papers, if any" }
+      ]
+    },
+    {
+      "family": "clothing",
+      "label": "Clothing",
+      "match": {
+        "pathAny": [],
+        "nameAny": ["Jeans", "Pants", "Trousers", "Shirt", "T-Shirt", "Polo", "Blouse", "Dress", "Skirt", "Shorts", "Jacket", "Coat", "Sweater", "Hoodie", "Sweatshirt"]
+      },
+      "roles": [
+        { "name": "Front", "hint": "Garment front, laid flat or on a form" },
+        { "name": "Back", "hint": "Garment back" },
+        { "name": "Brand", "hint": "The brand label" },
+        { "name": "Detail", "hint": "Any notable detail or flaw" },
+        { "name": "Measurement", "hint": "Tape measure across the waist or chest" },
+        { "name": "Size", "hint": "The size tag" },
+        { "name": "Materials", "hint": "The fabric/content tag" }
+      ]
+    }
+  ]
+}

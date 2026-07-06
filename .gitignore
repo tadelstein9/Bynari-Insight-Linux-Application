@@ -1,0 +1,38 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# PyInstaller / NSIS build output
+build/
+dist/
+*.manifest
+Bynari-Setup.exe
+
+# Node (puppeteer dev only) and generated / scratch files
+node_modules/
+inventory.json
+probe_gui.py
+test_parser.js
+verify_walk.js
+verify_upload.js
+*.AppImage
+
+# --- Secrets & seller data — NEVER commit (public repo) ---
+ebay_credentials.json
+*credential*.json
+engine/ebay/ebay_credentials.json
+engine/ebay/ebay_app.json
+ebay_app.json
+# the seller's library + inventory live on their own drive, not in the repo
+*.db
+.bynari-insight/
+photos/
+comp.json
+aspects.json
+listing.json

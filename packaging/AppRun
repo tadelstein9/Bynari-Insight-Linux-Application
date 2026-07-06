@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# AppImage entry point. The PyInstaller onedir build sits beside this file inside
+# the AppDir; force the Qt backend (GTK is excluded from the bundle) and launch.
+HERE="$(dirname "$(readlink -f "$0")")"
+export QT_API="${QT_API:-pyqt6}"
+export BYNARI_GUI="${BYNARI_GUI:-qt}"
+exec "$HERE/Bynari" "$@"

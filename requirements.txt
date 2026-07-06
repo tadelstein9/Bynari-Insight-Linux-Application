@@ -1,0 +1,9 @@
+# Bynari desktop shell — Linux build dependencies.
+# pywebview on Linux uses the Qt WebEngine backend (PyQt6 + QtWebEngine); the
+# [qt] extra pulls it in. Set BYNARI_GUI=qt if pywebview doesn't auto-select it.
+pywebview[qt]>=5.0
+pyinstaller>=6.0
+# Inventory "Save to library" copy-in pipeline (photo_ingest.py) needs these at
+# runtime; without them the packaged app crashes when a seller saves photos.
+requests>=2.31
+Pillow>=10.0

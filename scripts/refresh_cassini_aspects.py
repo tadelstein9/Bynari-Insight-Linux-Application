@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""Refresh cassini.db item-specifics from eBay's LIVE aspect data (via broker).
+
+Why this exists
+---------------
+cassini.db's per-category item-specifics schema was built from eBay's old
+category APIs — GetCategories (decommissioned 2026-03-31) and GetCategoryFeatures
+(2026-05-04). eBay has since moved to the Metadata API and added a new aspect
+type (aspectAdvancedDataType = NUMERIC_RANGE, e.g. a keyboard's "Device Charging
+Range" Min–Max W field). Left alone, cassini.db drifts out of sync with eBay.
+
+This maintenance script pulls each category's current aspects through the
+broker's LIVE item_aspects.php (which fronts the Taxonomy/Metadata API) and
+re-snapshots them into cassini.db. It is the schema engine's update path.
+
+Safety
+------
+- DRY-RUN by default: fetch + report only, no writes. Pass --apply to write.
+- Per-category guard: a category is only rewritten when the live fetch returns
+  a non-empty, well-formed aspect list — a failed/empty/challenged fetch leaves
+  the existing rows untouched (never wipes good data on a bad response).
+- Idempotent: --apply replaces exactly the named categories' rows.
+
+Usage
+-----
+    python scripts/refresh_cassini_aspects.py [CATEGORY_ID ...]            # dry-run
+    python scripts/refresh_cassini_aspects.py 11483 51020 --apply         # write
+    python scripts/refresh_cassini_aspects.py --db /path/cassini.db 11483
+Default categories (a representative sample) when none are given: a wristwatch
+leaf, a men's-jeans leaf, and a computer-keyboard leaf.
+"""
+import os
+import sqlite3
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from engine import broker  # noqa: E402
+
+DEFAULT_DB = os.environ.get("CASSINI_DB", "cassini.db")
+DEFAULT_CATS = ["51020", "11483", "33963"]  # wristwatch, men's jeans, keyboards
+
+
+def _aspect_rows(payload):
+    """Normalize the broker's item_aspects payload to row dicts, or None if the
+    response isn't a usable aspect list (guard against wiping on a bad fetch)."""
+    if not isinstance(payload, dict):
+        return None
+    aspects = payload.get("aspects")
+    if not isinstance(aspects, list) or not aspects:
+        return None
+    rows = []
+    for a in aspects:
+        name = (a.get("name") or "").strip()
+        if not name:
+            continue
+        mode = a.get("mode") or a.get("aspectMode")
+        required = 1 if (a.get("required") or mode == "REQUIRED") else 0
+        data_type = a.get("dataType") or a.get("aspectDataType")
+        advanced = a.get("aspectAdvancedDataType") or a.get("advancedDataType")
+        values = a.get("allowedValues") or a.get("values") or []
+        rows.append({
+            "name": name, "mode": mode, "required": required,
+            "data_type": data_type, "advanced": advanced,
+            "values": [str(v) for v in values if v not in (None, "")],
+        })
+    return rows or None
+
+
+def _ensure_advanced_column(con):
+    cols = {r[1] for r in con.execute("PRAGMA table_info(item_specifics)")}
+    if "advanced_data_type" not in cols:
+        con.execute("ALTER TABLE item_specifics ADD COLUMN advanced_data_type TEXT")
+
+
+def _apply_category(con, cat, rows):
+    # Drop the category's existing specifics + their allowed_values, then insert.
+    old_ids = [r[0] for r in con.execute(
+        "SELECT id FROM item_specifics WHERE category_id=?", (cat,))]
+    if old_ids:
+        con.executemany("DELETE FROM allowed_values WHERE specific_id=?",
+                        [(i,) for i in old_ids])
+        con.execute("DELETE FROM item_specifics WHERE category_id=?", (cat,))
+    for r in rows:
+        cur = con.execute(
+            "INSERT INTO item_specifics "
+            "(category_id, aspect_name, aspect_mode, required, data_type, advanced_data_type) "
+            "VALUES (?,?,?,?,?,?)",
+            (cat, r["name"], r["mode"], r["required"], r["data_type"], r["advanced"]),
+        )
+        sid = cur.lastrowid
+        for v in r["values"]:
+            con.execute("INSERT INTO allowed_values (specific_id, value) VALUES (?,?)",
+                        (sid, v))
+
+
+def main(argv):
+    args = argv[1:]
+    apply = "--apply" in args
+    args = [a for a in args if a != "--apply"]
+    db = DEFAULT_DB
+    if "--db" in args:
+        i = args.index("--db")
+        db = args[i + 1]
+        del args[i:i + 2]
+    cats = args or DEFAULT_CATS
+
+    if not os.path.exists(db):
+        sys.stderr.write(f"cassini.db not found: {db}\n")
+        return 1
+
+    print(f"{'APPLY' if apply else 'DRY-RUN'} — broker {broker.BASE} → {db}\n")
+    con = sqlite3.connect(db)
+    if apply:
+        _ensure_advanced_column(con)
+
+    changed = skipped = 0
+    for cat in cats:
+        try:
+            payload = broker.fetch_item_aspects(cat)
+        except broker.BrokerError as e:
+            print(f"  [{cat}] FETCH FAILED — {e}  (left untouched)")
+            skipped += 1
+            continue
+        rows = _aspect_rows(payload)
+        if rows is None:
+            print(f"  [{cat}] empty/unusable aspect list — left untouched")
+            skipped += 1
+            continue
+        req = sum(r["required"] for r in rows)
+        ranges = sum(1 for r in rows if (r["advanced"] or "").upper() == "NUMERIC_RANGE")
+        note = f", {ranges} NUMERIC_RANGE" if ranges else ""
+        changed += 1
+        if apply:
+            _apply_category(con, cat, rows)
+            print(f"  [{cat}] WROTE {len(rows)} aspects ({req} required{note})")
+        else:
+            print(f"  [{cat}] {len(rows)} aspects ({req} required{note}) — would write")
+
+    if apply:
+        con.commit()
+    con.close()
+    print(f"\n{'Wrote' if apply else 'Would write'} {changed} categories; {skipped} skipped.")
+    if not apply:
+        print("Re-run with --apply to update cassini.db.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

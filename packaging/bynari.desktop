@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Bynari Insight
+GenericName=Listing and Inventory Manager
+Comment=Turn your photos into finished eBay listings and manage your inventory offline
+Exec=Bynari
+Icon=bynari
+Categories=Office;
+Terminal=false

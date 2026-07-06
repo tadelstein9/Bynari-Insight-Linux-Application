@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect your eBay account — Bynari</title>
+<style>
+  :root{
+    --bg:#0f1218; --card:#171b23; --line:#252b36; --ink:#e8ecf3; --muted:#9aa4b2;
+    --brand:#4f9cff; --ok:#37c07a; --err:#ff6b6b; --chip:#1e2430;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:28px 22px 60px}
+  .hero h1{margin:0 0 6px;font-size:24px;letter-spacing:.2px}
+  .hero p{margin:0;color:var(--muted)}
+  .free{display:inline-flex;gap:8px;margin:14px 0 22px;flex-wrap:wrap}
+  .free span{background:var(--chip);border:1px solid var(--line);color:var(--ink);
+             padding:5px 12px;border-radius:999px;font-size:13px}
+  .free span b{color:var(--ok)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+        padding:20px;margin:16px 0}
+  .card h2{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:10px}
+  .step{width:24px;height:24px;border-radius:50%;background:var(--chip);
+        border:1px solid var(--line);display:inline-flex;align-items:center;
+        justify-content:center;font-size:13px;color:var(--muted)}
+  .step.done{background:var(--ok);color:#04140b;border-color:var(--ok)}
+  .card .sub{color:var(--muted);margin:0 0 14px;font-size:13.5px}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+  input,select{width:100%;background:#0d1117;border:1px solid var(--line);
+        color:var(--ink);border-radius:9px;padding:10px 12px;font-size:14px}
+  input:focus,select:focus{outline:none;border-color:var(--brand)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:220px}
+  button{background:var(--brand);color:#04121f;border:0;border-radius:9px;
+         padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;margin-top:16px}
+  button.ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .msg{margin-top:12px;font-size:13.5px;min-height:20px}
+  .msg.ok{color:var(--ok)} .msg.err{color:var(--err)}
+  details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  summary{cursor:pointer;color:var(--brand);font-size:13.5px}
+  details ol{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:13.5px}
+  details li{margin:6px 0}
+  a{color:var(--brand);cursor:pointer}
+  .help{background:var(--chip);border:1px solid var(--line);border-radius:10px;
+        padding:12px 14px;margin-top:16px;color:var(--muted);font-size:13.5px}
+  .help b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" style="color:var(--brand);text-decoration:none;font-size:13px">‹ Bynari home</a>
+  <div class="hero" style="margin-top:12px">
+    <h1>Connect your eBay account</h1>
+    <p>Bynari lists to <b>your</b> eBay account, on your trigger. Your keys stay on your machine.</p>
+    <div class="free">
+      <span><b>Free</b></span>
+      <span>We help you set it up</span>
+      <span>Contact us anytime</span>
+    </div>
+  </div>
+
+  <!-- Step 1 — credentials -->
+  <div class="card">
+    <h2><span class="step" id="s1">1</span> Your eBay developer keys</h2>
+    <p class="sub">Bynari uses these to talk to eBay as you — you bring your own keys. Nothing leaves your computer.</p>
+    <div class="row">
+      <div><label>App ID (Client ID)</label><input id="client_id" autocomplete="off" spellcheck="false"></div>
+      <div><label>Cert ID (Client Secret)</label><input id="client_secret" type="password" autocomplete="off" spellcheck="false"></div>
+    </div>
+    <label>Refresh token</label>
+    <input id="refresh_token" autocomplete="off" spellcheck="false">
+    <button onclick="saveCreds()">Save keys</button>
+    <div class="msg" id="m1"></div>
+
+    <details>
+      <summary>How do I get these?</summary>
+      <ol>
+        <li>Create a free developer account at <a onclick="ext('https://developer.ebay.com')">developer.ebay.com</a>.</li>
+        <li>Under <b>Application Keys</b>, make a <b>Production</b> keyset — that gives you the <b>App ID</b> and <b>Cert ID</b>.</li>
+        <li>Add an <b>OAuth redirect URI (RuName)</b> to that keyset.</li>
+        <li>Run the <b>user consent flow</b> once to mint your <b>refresh token</b> (grant the Sell/Inventory scopes).</li>
+      </ol>
+      <div class="help">Not sure, or stuck on the OAuth step? <b>We help.</b> That's what we're here for — reach out and we'll walk you through it.</div>
+    </details>
+  </div>
+
+  <!-- Step 2 — test -->
+  <div class="card">
+    <h2><span class="step" id="s2">2</span> Test the connection</h2>
+    <p class="sub">Confirms your keys work and reads your business policies. Read-only — nothing is listed.</p>
+    <button class="ghost" onclick="testConn()">Test connection</button>
+    <div class="msg" id="m2"></div>
+  </div>
+
+  <!-- Step 3 — default policies -->
+  <div class="card">
+    <h2><span class="step" id="s3">3</span> Pick your default policies</h2>
+    <p class="sub">eBay requires a shipping, payment, and return policy plus a location on every listing. Choose your defaults — you can override per item later.</p>
+    <button class="ghost" onclick="loadPolicies()">Load my policies</button>
+    <div class="row" style="margin-top:14px">
+      <div><label>Shipping (fulfillment)</label><select id="sel_fulfillment"></select></div>
+      <div><label>Payment</label><select id="sel_payment"></select></div>
+    </div>
+    <div class="row">
+      <div><label>Return</label><select id="sel_return"></select></div>
+      <div><label>Location</label><select id="sel_location"></select></div>
+    </div>
+    <button onclick="savePolicies()">Save defaults</button>
+    <div class="msg" id="m3"></div>
+  </div>
+
+  <div class="help" id="doneBar" style="display:none">
+    <b>You're connected.</b> Bynari can now build and publish listings to your eBay account — on your say-so, never automatically.
+  </div>
+</div>
+
+<script>
+function api(){ return (window.pywebview && window.pywebview.api) || null; }
+async function call(m, ...a){
+  const x = api();
+  if(!x || !x[m]) throw new Error("Open this inside the Bynari app — the desktop bridge isn't available in a plain browser.");
+  return await x[m](...a);
+}
+const el = id => document.getElementById(id);
+const v  = id => (el(id).value || "").trim();
+function msg(id, text, kind){ const n=el(id); n.textContent=text||""; n.className="msg"+(kind?(" "+kind):""); }
+const m1=(t,k)=>msg('m1',t,k), m2=(t,k)=>msg('m2',t,k), m3=(t,k)=>msg('m3',t,k);
+function markDone(step, done){ el(step).classList.toggle('done', !!done); el(step).textContent = done ? '✓' : step.slice(1); }
+function ext(url){ const x=api(); if(x&&x.open_url) x.open_url(url); else window.open(url,'_blank'); }
+
+async function saveCreds(){
+  m1('Saving…');
+  try{
+    const r = await call('ebay_save_credentials', {
+      client_id:v('client_id'), client_secret:v('client_secret'),
+      refresh_token:v('refresh_token')
+    });
+    if(r.ok){ markDone('s1',true); m1('Saved. Now test the connection.','ok'); }
+    else m1(r.error||'Could not save.','err');
+  }catch(e){ m1(e.message,'err'); }
+}
+
+async function testConn(){
+  m2('Testing…');
+  try{
+    const r = await call('ebay_check');
+    if(r.ok){
+      markDone('s2',true);
+      m2(`Connected ✓ — ${r.fulfillment} shipping, ${r.payment} payment, ${r.return} return polic${r.return===1?'y':'ies'}, ${r.location} location(s).`,'ok');
+    } else m2(r.error||'Connection failed.','err');
+  }catch(e){ m2(e.message,'err'); }
+}
+
+function fill(id, rows, chosen){
+  const s = el(id); s.innerHTML='';
+  const none=document.createElement('option'); none.value=''; none.textContent='— choose —'; s.appendChild(none);
+  (rows||[]).forEach(r=>{ const o=document.createElement('option'); o.value=r.id; o.textContent=r.label||r.id;
+    if(chosen&&chosen===r.id) o.selected=true; s.appendChild(o); });
+}
+
+async function loadPolicies(){
+  m3('Loading…');
+  try{
+    const r = await call('ebay_list_policies');
+    if(!r.ok){ m3(r.error||'Could not load policies.','err'); return; }
+    const sel = (window._selected)||{};
+    fill('sel_fulfillment', r.fulfillment, sel.fulfillment_policy_id);
+    fill('sel_payment', r.payment, sel.payment_policy_id);
+    fill('sel_return', r.return, sel.return_policy_id);
+    fill('sel_location', r.location, sel.merchant_location_key);
+    m3('Pick your defaults, then save.','ok');
+  }catch(e){ m3(e.message,'err'); }
+}
+
+async function savePolicies(){
+  m3('Saving…');
+  try{
+    const r = await call('ebay_save_policies', {
+      fulfillment_policy_id:v('sel_fulfillment'), payment_policy_id:v('sel_payment'),
+      return_policy_id:v('sel_return'), merchant_location_key:v('sel_location')
+    });
+    if(r.ok){ markDone('s3',true); m3('Saved. You are ready to list.','ok'); el('doneBar').style.display='block'; }
+    else m3(r.error||'Could not save.','err');
+  }catch(e){ m3(e.message,'err'); }
+}
+
+async function init(){
+  try{
+    const st = await call('ebay_connection_status');
+    markDone('s1', st.credentials); markDone('s2', st.credentials);
+    markDone('s3', st.policies);
+    window._selected = st.selected || {};
+    if(st.policies) el('doneBar').style.display='block';
+  }catch(e){ /* not in app context yet */ }
+}
+window.addEventListener('pywebviewready', init);
+if(api()) init();
+</script>
+</body>
+</html>
