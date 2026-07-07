@@ -1,0 +1,10 @@
+{
+  "_comment": "Copy this to etsy_app.json and fill in. Your OWN app, your OWN shop.",
+  "keystring": "PASTE_YOUR_ETSY_APP_KEYSTRING_HERE",
+  "shared_secret": "PASTE_YOUR_SHARED_SECRET_HERE",
+  "redirect_uri": "http://localhost:3003/callback",
+
+  "_setup_after_login": "Run these once and paste the ids below:",
+  "shipping_profile_id": null,
+  "return_policy_id": null
+}

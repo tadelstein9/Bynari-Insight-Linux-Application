@@ -36,3 +36,9 @@ photos/
 comp.json
 aspects.json
 listing.json
+
+# Etsy — secrets and per-item data, never commit
+etsy_app.json
+etsy_token.json
+etsy_meta.json
+etsy_draft.json
